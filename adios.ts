@@ -12,10 +12,6 @@ const OPTIONS_DEFAULT_GET: IAdiosGetOptions = {
 	timeout: TIMEOUT_DEFAULT,
 }
 
-// Make a client side version of this as well using Native Fetch
-// Abortable -> https://medium.com/@bramus/cancel-a-javascript-promise-with-abortcontroller-3540cbbda0a9
-// Add ability for multiple proxies. Add ability formultiple promises. Add client side support.
-// Add ability for multiple requests
 class Adios {
 	public static interceptors: any = {
 		delete: {
