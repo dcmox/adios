@@ -145,7 +145,27 @@ export class Adios {
 		return Adios.request(gOpts)
 	}
 
-	public static async request(opts: IAdiosPostOptions): Promise<any> {
+	public static async all(promises: any[]): Promise<any> {
+		for (let i = 0; i < promises.length; i++) {
+			if (typeof promises[i] === 'string') {
+				promises[i] = Adios.request({ url: promises[i] }, true)
+			} else if (toString.call(promises[i]) !== '[object Promise]') {
+				promises[i] = Adios.request(promises[i], true)
+			}
+		}
+
+		return await Promise.all(promises).then(async (responses) => {
+			const resp: any = []
+			responses.forEach(async (response) => {
+				resp.push(await response.json())
+			})
+			return resp
+		})
+	}
+	public static async request(
+		opts: IAdiosPostOptions,
+		noAwait: boolean = false,
+	): Promise<any> {
 		// Set options
 		const gOpts = Object.assign({}, OPTIONS_DEFAULT_GET, opts)
 
@@ -213,6 +233,11 @@ export class Adios {
 				.forEach((cb: any) => {
 					cb(gOpts)
 				})
+		}
+
+		// For Adios.all() requests
+		if (noAwait) {
+			return protocol.request(gOpts)
 		}
 
 		// Return promise
