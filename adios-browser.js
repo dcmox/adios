@@ -36,7 +36,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var parseUri = require('urlparser-simple').parseUri;
 var TIMEOUT_DEFAULT = 4000;
 var OPTIONS_DEFAULT_POST = {
     data: {},
@@ -53,41 +52,14 @@ var Adios = /** @class */ (function () {
     }
     Adios.get = function (url, opts) {
         return __awaiter(this, void 0, void 0, function () {
-            var gOpts, protocol, port;
+            var gOpts;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        gOpts = opts
-                            ? Object.assign({ url: url }, OPTIONS_DEFAULT_GET, opts, { url: url })
-                            : Object.assign({ url: url }, OPTIONS_DEFAULT_GET, { url: url });
-                        protocol = gOpts.url.toLowerCase().indexOf('https') === 0
-                            ? require('https')
-                            : require('http');
-                        port = gOpts.port
-                            ? gOpts.port
-                            : gOpts.url.toLowerCase().indexOf('https') === 0
-                                ? 443
-                                : 80;
-                        if (!gOpts.port) {
-                            gOpts.port = port;
-                        }
-                        // Run interceptors here, same in post
-                        if (Adios._interceptors.get.length) {
-                            Adios._interceptors.get
-                                .filter(function (cb) { return cb; })
-                                .forEach(function (cb) {
-                                cb(gOpts);
-                            });
-                        }
-                        return [4 /*yield*/, new Promise(function (resolve, reject) {
-                                protocol.get(url, gOpts, function (res) {
-                                    Adios._handleResponse(res, resolve, reject, gOpts.progress || undefined);
-                                });
-                            })];
-                    case 1: 
-                    // Return promise
-                    return [2 /*return*/, _a.sent()];
-                }
+                gOpts = opts
+                    ? Object.assign({ url: url }, OPTIONS_DEFAULT_GET, opts, { url: url })
+                    : Object.assign({ url: url }, OPTIONS_DEFAULT_GET, { url: url });
+                gOpts.method = 'get';
+                gOpts.url = url;
+                return [2 /*return*/, Adios.request(gOpts)];
             });
         });
     };
@@ -120,86 +92,44 @@ var Adios = /** @class */ (function () {
     };
     Adios.request = function (opts) {
         return __awaiter(this, void 0, void 0, function () {
-            var gOpts, fragments, scheme, protocol, HttpsProxyAgent, agent, port, data;
+            var gOpts, options, handle, ac_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         gOpts = Object.assign({}, OPTIONS_DEFAULT_GET, opts);
-                        fragments = parseUri(opts.url);
-                        scheme = fragments.scheme.toLowerCase();
-                        protocol = scheme === 'https'
-                            ? require('follow-redirects').https
-                            : require('follow-redirects').http;
-                        // Set host/path based on proxy options
-                        if (gOpts.proxy) {
-                            if (scheme === 'https') {
-                                HttpsProxyAgent = require('https-proxy-agent');
-                                agent = new HttpsProxyAgent({
-                                    host: gOpts.proxy.host,
-                                    port: gOpts.proxy.port
-                                });
-                                gOpts.agent = agent;
-                            }
-                            else {
-                                gOpts.host = gOpts.proxy.host;
-                                gOpts.port = gOpts.proxy.port;
-                                gOpts.path = gOpts.url;
-                            }
-                            if (gOpts.proxy.auth) {
-                                gOpts.headers['Proxy-Authorization'] = new Buffer('Basic ' +
-                                    (gOpts.proxy.auth.username + ":" + gOpts.proxy.auth.password)).toString('base64');
-                            }
-                        }
-                        else {
-                            gOpts.host = fragments.host;
-                            gOpts.path = '/' + fragments.path;
-                        }
-                        port = gOpts.port
-                            ? gOpts.port
-                            : gOpts.url.toLowerCase().indexOf('https') === 0
-                                ? 443
-                                : 80;
-                        if (!gOpts.port) {
-                            gOpts.port = port;
-                        }
-                        data = '';
-                        if (gOpts.data && Object.keys(gOpts.data).length) {
-                            data = JSON.stringify(gOpts.data);
-                            if (!gOpts.headers['Content-Length']) {
-                                gOpts.headers['Content-Length'] = data.length;
-                            }
-                            if (!gOpts.headers['Content-type']) {
-                                gOpts.headers['Content-type'] = 'application/json';
-                            }
+                        options = {
+                            body: typeof gOpts.data === 'object'
+                                ? JSON.stringify(gOpts.data)
+                                : gOpts.data,
+                            cache: 'no-cache' || gOpts.cache,
+                            credentials: 'same-origin',
+                            headers: gOpts.headers,
+                            method: gOpts.method,
+                            mode: 'cors' || gOpts.mode,
+                            redirect: 'follow' || gOpts.redirect,
+                            referrerPolicy: 'no-referrer' || gOpts.referrerPolicy
+                        };
+                        if (gOpts.credentials) {
+                            options.credentials = gOpts.credentials;
                         }
                         // Run interceptors here, same in post
                         if (Adios._interceptors[gOpts.method || 'request'].length) {
                             Adios._interceptors[gOpts.method || 'request']
                                 .filter(function (cb) { return cb; })
                                 .forEach(function (cb) {
-                                cb(gOpts);
+                                cb(options);
                             });
                         }
-                        return [4 /*yield*/, new Promise(function (resolve, reject) {
-                                try {
-                                    var handle = protocol.request(gOpts, function (res) {
-                                        Adios._handleResponse(res, resolve, reject, gOpts.progress || undefined);
-                                    });
-                                    if (gOpts.id) {
-                                        Adios.handles[gOpts.id] = { handle: handle, resolve: resolve };
-                                    }
-                                    if (data.length) {
-                                        handle.write(data);
-                                    }
-                                    handle.end();
-                                }
-                                catch (e) {
-                                    reject(e.toString());
-                                }
+                        if (gOpts.timeout) {
+                            ac_1 = new AbortController();
+                            gOpts.signal = ac_1.signal;
+                            handle = setTimeout(function () { return ac_1.abort(); }, gOpts.timeout);
+                        }
+                        return [4 /*yield*/, fetch(gOpts.url || '', options).then(function (response) {
+                                clearTimeout(handle);
+                                return response.json();
                             })];
-                    case 1: 
-                    // Return promise
-                    return [2 /*return*/, _a.sent()];
+                    case 1: return [2 /*return*/, _a.sent()];
                 }
             });
         });
@@ -214,62 +144,6 @@ var Adios = /** @class */ (function () {
                 return [2 /*return*/, Adios.request(gOpts)];
             });
         });
-    };
-    Adios._handleResponse = function (res, resolve, reject, progress) {
-        var headers = res.headers, statusCode = res.statusCode, statusMessage = res.statusMessage;
-        // Handle bad status codes
-        if (statusCode >= 400) {
-            res.resume();
-            reject({ headers: headers, statusCode: statusCode, statusMessage: statusMessage });
-            return;
-        }
-        // For progress monitoring
-        var len = Number(res.headers['content-length']);
-        // Handle our response
-        res.setEncoding('utf8');
-        var rawData = '';
-        res.on('data', function (chunk) {
-            rawData += chunk;
-            // If progress callback
-            if (progress) {
-                progress({
-                    bytes: rawData.length,
-                    chunkSize: chunk.length,
-                    percent: Number(((rawData.length / len) * 100).toFixed(2)),
-                    total: len
-                });
-            }
-        });
-        // Attempt to resolve and clear timeout
-        res.on('end', function () {
-            if (progress) {
-                progress({
-                    bytes: len,
-                    chunkSize: 0,
-                    percent: 100,
-                    total: len
-                });
-            }
-            try {
-                var parsedData = Adios._parse(rawData);
-                resolve(parsedData);
-            }
-            catch (e) {
-                reject(e.message);
-            }
-        });
-    };
-    Adios._parse = function (s) {
-        if (s.trim().search(/^(\[|\{){1}/) > -1) {
-            try {
-                var tmp = JSON.parse(s);
-                return tmp;
-            }
-            catch (e) {
-                return s;
-            }
-        }
-        return s;
     };
     Adios.interceptors = {
         "delete": {
@@ -325,7 +199,6 @@ var Adios = /** @class */ (function () {
         abort: function (id) {
             if (Adios.handles[id]) {
                 Adios.handles[id].handle.abort();
-                Adios.handles[id].resolve({ statusMessage: 'Aborted' });
                 delete Adios.handles[id];
                 return true;
             }
@@ -343,4 +216,4 @@ var Adios = /** @class */ (function () {
     };
     return Adios;
 }());
-exports.Adios = Adios;
+exports["default"] = Adios;

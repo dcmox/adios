@@ -1,6 +1,6 @@
 {
 	"name": "moxy-adios",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"private": false,
 	"description": "Axios replacement using native fetch API",
 	"main": "adios.js",
@@ -22,9 +22,9 @@
 	"scripts": {
 		"test": "jest tests/*",
 		"build": "npm run build:main",
-		"pack": "webpack ./adios.js",
-		"build:main": "tsc adios.ts",
-		"watch": "tsc -w adios.ts",
+		"pack": "webpack ./adios-browser.js",
+		"build:main": "tsc adios.ts && tsc adios-browser.ts",
+		"watch": "tsc -w adios-browser.ts",
 		"testb": "node adios.js"
 	},
 	"repository": {
@@ -47,6 +47,8 @@
 	"dependencies": {
 		"follow-redirects": "^1.10.0",
 		"https-proxy-agent": "^5.0.0",
+		"net": "^1.0.2",
+		"tls": "0.0.1",
 		"urlparser-simple": "^1.0.3"
 	}
 }

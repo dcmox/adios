@@ -1,26 +1,26 @@
-interface IKVPair {
+export interface IKVPair {
 	[key: string]: any
 }
 
-interface IAdiosCredentials {
+export interface IAdiosCredentials {
 	username: string
 	password: string
 }
 
-interface IAdiosProxyOptions {
+export interface IAdiosProxyOptions {
 	host: string
 	port: number
 	auth?: IAdiosCredentials
 }
 
-interface IProgressResult {
+export interface IProgressResult {
 	bytes?: number
 	chunkSize?: number
 	total?: number
 	percent?: number
 }
 
-interface IAdiosPostOptions {
+export interface IAdiosPostOptions {
 	id?: string // In case you wish to abort
 	url?: string
 	timeout?: number
@@ -33,11 +33,14 @@ interface IAdiosPostOptions {
 	proxy?: IAdiosProxyOptions
 	agent?: any
 	progress?: (progress: IProgressResult) => any
+	signal?: any
 }
 
-interface IAdiosGetOptions {
+export interface IAdiosGetOptions {
 	timeout?: number
 	headers?: any
 	port?: number
 	progress?: (progress: IProgressResult) => any
+	signal?: any
+	method?: 'get' | 'GET'
 }

@@ -1,3 +1,9 @@
+import {
+	IAdiosGetOptions,
+	IAdiosPostOptions,
+	IProgressResult,
+} from './interfaces'
+
 const { parseUri } = require('urlparser-simple')
 
 const TIMEOUT_DEFAULT = 4000
@@ -12,11 +18,11 @@ const OPTIONS_DEFAULT_GET: IAdiosGetOptions = {
 	timeout: TIMEOUT_DEFAULT,
 }
 
-class Adios {
+export class Adios {
 	public static interceptors: any = {
 		delete: {
 			use(callback: (config: any) => any): number {
-				return Adios._interceptors.request.delete(callback)
+				return Adios._interceptors.delete.push(callback)
 			},
 			remove(index: number): any {
 				Adios._interceptors.delete[index] = null
@@ -24,7 +30,7 @@ class Adios {
 		},
 		get: {
 			use(callback: (config: any) => any): number {
-				return Adios._interceptors.request.get(callback)
+				return Adios._interceptors.get.push(callback)
 			},
 			remove(index: number): any {
 				Adios._interceptors.get[index] = null
@@ -317,5 +323,3 @@ class Adios {
 		return s
 	}
 }
-
-module.exports = Adios
