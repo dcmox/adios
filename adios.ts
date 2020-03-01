@@ -323,3 +323,5 @@ export class Adios {
 		return s
 	}
 }
+
+module.exports = Adios

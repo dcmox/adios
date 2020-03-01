@@ -344,3 +344,4 @@ var Adios = /** @class */ (function () {
     return Adios;
 }());
 exports.Adios = Adios;
+module.exports = Adios;

@@ -114,7 +114,7 @@ export default class Adios {
 		// Set options
 		const gOpts: any = Object.assign({}, OPTIONS_DEFAULT_GET, opts)
 
-		const options = {
+		const options: any = {
 			body:
 				typeof gOpts.data === 'object'
 					? JSON.stringify(gOpts.data)
