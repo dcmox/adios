@@ -14,7 +14,7 @@ Adios.get('https://pokeapi.co/api/v2/pokemon/ditto') // Simple get request
 	.catch((err) => console.log(err))
 ```
 
-## In the browser
+## Browser Use
 
 ```javascript
 <script src="../bin/adios-browser.js"></script>
@@ -38,7 +38,6 @@ Adios.get('https://pokeapi.co/api/v2/pokemon/ditto') // Simple get request
 
 ## Todo
 
--   Make a client side version of this as well using Native Fetch API
--   Make the requests fully abortable
--   Add ability for multiple proxies.
+-   Make the requests fully abortable (via Node)
+-   Add ability for rotating proxies.
 -   Add ability for multiple requests in parallel.
