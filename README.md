@@ -40,4 +40,3 @@ Adios.get('https://pokeapi.co/api/v2/pokemon/ditto') // Simple get request
 
 -   Make the requests fully abortable (via Node)
 -   Add ability for rotating proxies.
--   Add ability for multiple requests in parallel.
